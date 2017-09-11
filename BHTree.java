@@ -6,15 +6,14 @@
  * Dependencies: Body.java Quad.java
  *
  * @author chindesaurus
- * @version 1.00 
+ * @author James Ni
+ * @version 1.01
  */
-
-import java.awt.Color;
 
 public class BHTree {
 
     // threshold value
-    private final double Theta = 0.5;
+    private double Theta;
 
     private Body body;     // body or aggregate body stored in this node
     private Quad quad;     // square region that the tree represents
@@ -30,13 +29,14 @@ public class BHTree {
      *
      * @param q the quadrant this node is contained within
      */
-    public BHTree(Quad q) {
+    public BHTree(Quad q, double threshold) {
         this.quad = q;
         this.body = null;
         this.NW = null;
         this.NE = null;
         this.SW = null;
         this.SE = null;
+        this.Theta = threshold;
     }
  
 
@@ -63,10 +63,10 @@ public class BHTree {
         // external node
         else {
             // subdivide the region further by creating four children
-            NW = new BHTree(quad.NW());
-            NE = new BHTree(quad.NE());
-            SE = new BHTree(quad.SE());
-            SW = new BHTree(quad.SW());
+            NW = new BHTree(quad.NW(), this.Theta);
+            NE = new BHTree(quad.NE(), this.Theta);
+            SE = new BHTree(quad.SE(), this.Theta);
+            SW = new BHTree(quad.SW(), this.Theta);
 
             // recursively insert both this body and Body b into the appropriate quadrant
             putBody(this.body);
@@ -105,8 +105,9 @@ public class BHTree {
     /**
      * Approximates the net force acting on Body b from all bodies
      * in the invoking Barnes-Hut tree, and updates b's force accordingly.
+     * Modified to stop recursive depth at the 10th level if necessary.
      */
-    public void updateForce(Body b) {
+    public void updateForce(Body b, int level) {
     
         if (body == null || b.equals(body))
             return;
@@ -127,18 +128,20 @@ public class BHTree {
             // compare ratio (s / d) to threshold value Theta
             if ((s / d) < Theta)
                 b.addForce(body);   // b is far away
-            
+            else if(level>10){
+            	b.addForce(body);
+            }
             // recurse on each of current node's children
             else {
-                NW.updateForce(b);
-                NE.updateForce(b);
-                SW.updateForce(b);
-                SE.updateForce(b);
+                NW.updateForce(b, level+1);
+                NE.updateForce(b, level+1);
+                SW.updateForce(b, level+1);
+                SE.updateForce(b, level+1);
             }
         }
     }
-
-
+    
+    
     /**
      * Returns a string representation of the Barnes-Hut tree
      * in which spaces represent external nodes, and asterisks

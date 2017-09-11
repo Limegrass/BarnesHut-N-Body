@@ -5,7 +5,8 @@
  * velocity, mass, color, and the net force acting upon it.
  *
  * @author chindesaurus
- * @version 1.00
+ * @author James Ni
+ * @version 1.01
  */
 import java.awt.Color;
 
@@ -85,8 +86,20 @@ public class Body {
         double dy = b.ry - a.ry;
         double dist = Math.sqrt(dx*dx + dy*dy);
         double F = (G * a.mass * b.mass) / (dist*dist + EPS*EPS);
+        //double F = (G * a.mass * b.mass) / (dist*dist);
         a.fx += F * dx / dist;
         a.fy += F * dy / dist;
+    }
+    
+    /**
+     * Additively sums the force, used when receiving resulting forces from other processes
+     * @param fx x-axis force to add
+     * @param fy y-axis force to add
+     */
+    public void addForce(double fx, double fy) {
+        Body a = this;
+        a.fx += fx;
+        a.fy += fy;
     }
 
     /**
@@ -132,7 +145,42 @@ public class Body {
         double m = a.mass + b.mass;
         double x = (a.rx * a.mass + b.rx * b.mass) / m;
         double y = (a.ry * a.mass + b.ry * b.mass) / m;
-
         return new Body(x, y, a.vx, b.vx, m, a.color);
     }
+    
+    /**
+     * @return the object's force in the x-axis
+     */
+    public double fx(){
+    	return fx;
+    }
+    
+    /**
+     * @return the object's force in the y-axis
+     */
+    public double fy(){
+    	return fy;
+    }
+    
+    /**
+     * @return the object's position on the x-axis
+     */
+    public double rx(){
+    	return rx;
+    }
+    
+    /**
+     * @return the object's position on the y-axis
+     */
+    public double ry(){
+    	return ry;
+    }
+    
+    /**
+     * @return the mass of the object
+     */
+    public double mass(){
+    	return mass;
+    }
+   
 }
